@@ -1,31 +1,15 @@
-from typing import NewType
 from src.utils import *
 from .a import day_number, obtener_aciertos
 
 # Part 2
 
-MatchesCount = NewType("MatchesCount", int)
-
-Cards = list[int]
-CardMatches = list[MatchesCount]
-
-
-def calculate_initial_state(lines: Lines) -> tuple[Cards, CardMatches]:
-    cards: Cards = []
-    card_matches: CardMatches = []
-    for line in lines:
-        matches = obtener_aciertos(line)
-        cards.append(1)
-        card_matches.append(MatchesCount(matches))
-    return cards, card_matches
-
 
 def solve(lines: Lines) -> int:
-    cards, card_matches = calculate_initial_state(lines)
+    cards = [1 for _ in lines]
+    card_matches = g(lines).map(obtener_aciertos).list()
 
     # procesar premios
-    for i in range(len(cards)):
-        quantity = cards[i]
+    for i, quantity in enumerate(cards):
         if quantity == 0:
             continue
         matches = card_matches[i]

@@ -11,16 +11,20 @@ def extraer_numeros(s: str) -> set[int]:
 
 
 def obtener_aciertos(line: str) -> int:
-    _, a = line.split(":")
-    gan, mis = a.split("|")
+    gan, mis = line.split(":")[1].split("|")
     num_ganadores = extraer_numeros(gan)
     mis_numeros = extraer_numeros(mis)
     return len(num_ganadores & mis_numeros)
 
 
+# fmt: off
 def solve(lines: Lines) -> int:
-    todos_los_aciertos = (obtener_aciertos(line) for line in lines)
-    return sum(2 ** (aciertos - 1) for aciertos in todos_los_aciertos if aciertos)
+    return sum(g(lines)
+        .map(obtener_aciertos)
+        .filter(bool)
+        .map(lambda x: 2 ** (x - 1))
+    )
+# fmt: on
 
 
 def main() -> None:
