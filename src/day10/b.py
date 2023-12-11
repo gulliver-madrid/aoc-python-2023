@@ -11,25 +11,28 @@ visualization = True
 def solve(lines: Lines) -> int:
     nodes: dict[Node, tuple[Node, Node]] = {}
     start: Node | None = None
+    dimensions = (len(lines[0]), len(lines))
 
     line = ""
-    tipo_start: set[str] = set()
+    tipo_start: set[Direction] = set()
     for y, line in enumerate(lines):
         if visualization:
             print()
         assert line
-        for x, char_ in enumerate(line):
+        for x, char in enumerate(line):
             if visualization:
-                print(char_, end="")
-            tipo: set[str] = tipos_tuberias[char_]
+                print(char, end="")
             node = (x, y)
-
-            if tipo == {"O"}:
-                tipo = get_tipo_start(node, lines, line)
+            tipo: set[Direction] | None = None
+            if char == "S":
                 start = node
-                tipo_start = set(tipo)
-            neighbours = get_neighbours(node, tipo, lines, line)
-
+                tipo = get_tipo_start(node, lines, line)
+                tipo_start |= tipo
+            else:
+                tipo = tipos_tuberias.get(char)
+            if not tipo:
+                continue
+            neighbours = get_neighbours(node, tipo, dimensions)
             if neighbours:
                 nodes[node] = neighbours
 
@@ -52,49 +55,47 @@ def solve(lines: Lines) -> int:
             visited.add(neighbour)
             to_visit.append(neighbour)
 
-    dentro: list[Node] = []
+    node_path = frozenset(visited)
+    inner_nodes: list[Node] = []
     foto: list[list[str]] = []
     for y in range(len(lines)):
         foto.append(["." for _ in range(len(lines[0]))])
-        fuera = True
-        is_open = ""
+        inside = False
+        opened = ""
         for x in range(len(line)):
-            if (x, y) in visited:
+            if (x, y) in node_path:
                 char = lines[y][x]
+                # Replace S for their actual shape
                 if char == "S":
-                    char = ""
                     assert len(tipo_start) == 2
-                    found = ""
-                    for k, v in tipos_tuberias.items():
-                        if tipo_start == v:
-                            found = k
-                            break
-                    assert found
-                    char = found
-                if char in "|":
-                    fuera = not fuera
-                elif char in "LJ7F":
-                    if not is_open:
-                        is_open = char
-                    else:
-                        assert is_open in "LF", (is_open, (x, y))
-                        assert char in "J7", (is_open, (x, y))
-                        if is_open + char in ("L7", "FJ"):
-                            fuera = not fuera
-                        is_open = ""
+                    char = next(k for k, v in tipos_tuberias.items() if tipo_start == v)
+                    assert char
 
+                if char == "|":
+                    inside = not inside
+
+                if char not in "LJ7F":
+                    continue
+
+                # it's a corner
+                if not opened:
+                    assert char in "LF"
+                    opened = char
+                else:
+                    assert opened in "LF"
+                    assert char in "J7"
+                    if opened + char in ("L7", "FJ"):
+                        inside = not inside
+                    opened = ""
             else:
-                if not fuera:
-                    dentro.append((x, y))
+                if inside:
+                    inner_nodes.append((x, y))
                 if visualization:
-                    if not fuera:
-                        foto[y][x] = "I"
-                    else:
-                        foto[y][x] = "O"
+                    foto[y][x] = "I" if inside else "O"
     if visualization:
         for row in foto:
             print("".join(row))
-    return len(dentro)
+    return len(inner_nodes)
 
 
 def main() -> None:
