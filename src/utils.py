@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
 import time
 from typing import Iterable, Sequence, TypeVar
@@ -76,6 +77,15 @@ class Timer:
         print("Tiempo transcurrido:", time.time() - self.start)
 
 
+class Direction(Enum):
+    E = 0
+    S = 1
+    W = 2
+    N = 3
+
+
+directions = dict(E=Direction.E, S=Direction.S, W=Direction.W, N=Direction.N)
+
 __all__ = (
     "G_List",
     "G_Dict",
@@ -91,4 +101,6 @@ __all__ = (
     "tuple_two",
     "tuple_three",
     "Timer",
+    "Direction",
+    "directions",
 )
