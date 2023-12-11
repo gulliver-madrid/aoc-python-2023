@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
+import time
 from typing import Iterable, Sequence, TypeVar
 from .hack_python import G_List, G_Dict, g
-
 
 Lines = Sequence[str]
 
@@ -67,6 +67,15 @@ def tuple_three(iterable: Iterable[_T]) -> tuple[_T, _T, _T]:
     return tup
 
 
+class Timer:
+    def __enter__(self):
+        self.start = time.time()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):  # pyright: ignore
+        print("Tiempo transcurrido:", time.time() - self.start)
+
+
 __all__ = (
     "G_List",
     "G_Dict",
@@ -81,4 +90,5 @@ __all__ = (
     "Lines",
     "tuple_two",
     "tuple_three",
+    "Timer",
 )
